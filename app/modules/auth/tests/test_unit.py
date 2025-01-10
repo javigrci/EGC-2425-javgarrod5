@@ -117,3 +117,36 @@ def test_service_create_with_profile_fail_no_password(clean_database):
 
     assert UserRepository().count() == 0
     assert UserProfileRepository().count() == 0
+
+
+def test_count_users(test_client):
+    before = UserRepository().count()
+
+    data = {
+        "name": "Test",
+        "surname": "Foo",
+        "email": "service_test@example.com",
+        "password": "test1234"
+    }
+
+    AuthenticationService().create_with_profile(**data)
+    
+    after = UserRepository().count()
+
+    assert before +1 == after
+
+
+def test_wrong_login(clean_database):
+    data = {
+        "name": "",
+        "surname": "",
+        "email": "",
+        "password": ""
+    }
+
+    with pytest.raises(ValueError, match="Email is required."):
+        AuthenticationService().create_with_profile(**data)
+
+    assert UserRepository().count() == 0
+    assert UserProfileRepository().count() == 0
+    
